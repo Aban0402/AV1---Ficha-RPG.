@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <title>RPG Forge - Login</title>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center">
+
+    <div class="bg-slate-800 p-8 rounded-xl shadow-xl max-w-sm w-full text-center border border-slate-700">
+        <h2 class="text-3xl font-bold text-amber-400 mb-2">Entrar no Forge</h2>
+        <p class="text-gray-400 mb-6 text-sm">Guarde suas fichas de RPG na nuvem com sua conta.</p>
+
+        <div id="g_id_onload"
+             data-client_id="SEU_CLIENT_ID_AQUI.apps.googleusercontent.com"
+             data-context="signin"
+             data-ux_mode="popup"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+
+        <div class="flex justify-center my-4">
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="pill"
+                 data-theme="filled_blue"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left">
+            </div>
+        </div>
+
+        <hr class="border-slate-700 my-6">
+
+        <a href="index.html" class="text-amber-400 hover:underline text-sm flex items-center justify-center gap-1">
+            ⬅ Voltar para o Forjador
+        </a>
+    </div>
+
+    <script>
+        function handleCredentialResponse(response) {
+            console.log("Token JWT recebido do Google:", response.credential);
+            alert("Login efetuado com sucesso (Simulado via Console)!");
+            window.location.href = "index.html"; 
+        }
+    </script>
+</body>
+</html>

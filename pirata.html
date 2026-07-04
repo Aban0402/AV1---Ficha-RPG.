@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <title>RPG Forge - Mares de Sangue</title>
+
+    <style>
+        .fonte-titulo-pirata {
+            font-family: 'Georgia', 'Times New Roman', Times, serif !important;
+            letter-spacing: 0.08em;
+        }
+
+        .fonte-texto-pirata {
+            font-family: 'Georgia', 'Times New Roman', serif !important;
+        }
+
+        .fundo-pergaminho-vintage {
+            background-color: #faf6ee !important;
+            color: #1c1917 !important;
+            border: 3px double #451a03 !important;
+        }
+
+        .caixa-interna-pirata {
+            border: 1px solid #451a03 !important;
+            background-color: transparent !important;
+        }
+
+        .linha-pautada {
+            border-bottom: 1px solid #a16207 !important;
+            height: 26px;
+        }
+
+        .caixa-selecao-manual {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border: 1px solid #451a03;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body class="bg-cyan-950 text-white min-h-screen font-sans">
+
+    <header class="bg-slate-900 p-6 shadow-lg flex justify-between items-center border-b border-cyan-800">
+        <div>
+            <h1 class="text-4xl font-bold text-cyan-400">RPG Forge 🏴‍☠️</h1>
+            <p class="text-gray-300 mt-2">Mares de Sangue: Sistema 2D6</p>
+        </div>
+        <div>
+            <a href="index.html" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-semibold border border-slate-600 transition-all">
+                ⬅ Voltar ao Forjador
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-6">
+        
+        <div id="telaFormulario" class="bg-slate-900/80 rounded-xl p-6 shadow-xl border border-cyan-900">
+            <h2 class="text-2xl font-bold mb-6 text-cyan-400">Geração de Tripulante (Atributos 2D6)</h2>
+            <form id="formPirata" class="space-y-4">
+                <p class="text-gray-300 text-sm">Os campos abaixo servem para organizar o cabeçalho. Se preferir escrever tudo à mão livre na folha impressa, basta deixar em branco e clicar no botão abaixo.</p>
+                <div>
+                    <label class="block mb-1">Nome / Alcunha do Pirata</label>
+                    <input id="nome" type="text" class="w-full p-2 rounded text-black bg-cyan-50" placeholder="Ex: Capitão Sparrow">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1">Origem / Raça</label>
+                        <input id="raca" type="text" class="w-full p-2 rounded text-black bg-cyan-50" placeholder="Ex: Humano do Continente">
+                    </div>
+                    <div>
+                        <label class="block mb-1">Cargo / Função a Bordo</label>
+                        <input id="classe" type="text" class="w-full p-2 rounded text-black bg-cyan-50" placeholder="Ex: Tripulante">
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="rounded-xl border border-cyan-800/70 bg-slate-900/50 p-4">
+                        <label class="block mb-2 font-semibold text-cyan-300">Modo de Atributos</label>
+                        <select id="modoCriacaoPirata" class="w-full min-h-[52px] p-3 rounded-lg text-black bg-cyan-50 border border-cyan-300 shadow-sm">
+                            <option value="aleatorio">Aleatório</option>
+                            <option value="manual">Manual (rolar um por um)</option>
+                            <option value="manual-escrito">Manual (escrito)</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-2">Define se os atributos serão gerados automaticamente, rolados um por um ou digitados diretamente.</p>
+                    </div>
+                    <div class="rounded-xl border border-cyan-800/70 bg-slate-900/50 p-4">
+                        <label class="block mb-2 font-semibold text-cyan-300">Modo de Status</label>
+                        <select id="tipoStatusPirata" class="w-full min-h-[52px] p-3 rounded-lg text-black bg-cyan-50 border border-cyan-300 shadow-sm">
+                            <option value="auto">Automático</option>
+                            <option value="manual-dado">Manual (Dado)</option>
+                            <option value="manual-escrito">Manual (Escrito)</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-2">Define se Vida, Sanidade e Energia serão calculadas, roladas ou digitadas à mão.</p>
+                    </div>
+                </div>
+
+                <div id="containerStatusManuaisPirata" class="hidden rounded-lg border border-cyan-800 bg-cyan-950/50 p-4">
+                    <h3 class="text-sm font-bold text-cyan-300 mb-3">Status do Tripulante</h3>
+
+                    <div class="grid md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-sm mb-1">Vida</label>
+                            <input id="vidaManualPirata" type="number" min="1" value="12" class="w-full p-2 rounded text-black">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">Sanidade</label>
+                            <input id="sanidadeManualPirata" type="number" min="0" value="8" class="w-full p-2 rounded text-black">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">Energia</label>
+                            <input id="energiaManualPirata" type="number" min="0" value="10" class="w-full p-2 rounded text-black">
+                        </div>
+                    </div>
+                    <p id="textoStatusManualPirata" class="text-xs text-gray-400 mt-3">Escolha o modo de geração dos status.</p>
+                </div>
+
+                <button type="submit" class="bg-cyan-500 px-4 py-3 rounded text-slate-900 font-bold hover:bg-cyan-400 w-full mt-4 uppercase tracking-wider">
+                    Ir para Rolagem dos Atributos ⚓
+                </button>
+            </form>
+        </div>
+
+        <div id="rolagem" class="hidden mt-8 bg-slate-900/80 rounded-xl p-6 shadow-lg border border-cyan-800">
+            <h2 id="tituloRolagemPirata" class="text-3xl font-bold text-center text-cyan-400 mb-2">Definição de Atributos (2D6)</h2>
+            <p id="subtituloRolagemPirata" class="text-center text-gray-300 text-sm mb-4">Escolha um atributo por vez, role os dados e salve o valor.</p>
+            
+            <div id="containerSelecaoAtributoManual" class="max-w-xs mx-auto mb-6">
+                <select id="selectAtributoManual" class="w-full p-3 rounded text-black font-semibold text-center bg-cyan-100"></select>
+                <div id="containerValorAtributoEscritoPirata" class="hidden mt-3">
+                    <input id="valorAtributoManualPirata" type="number" min="1" class="w-full p-3 rounded text-black font-semibold text-center bg-cyan-50 border border-cyan-300" placeholder="Digite o valor do atributo">
+                </div>
+            </div>
+            <div id="containerSelecaoStatusManual" class="hidden max-w-md mx-auto mb-6">
+                <select id="selectStatusManualPirata" class="w-full min-h-[52px] p-3 rounded-lg text-black font-semibold text-center bg-cyan-100 border border-cyan-300 shadow-sm">
+                    <option value="">-- Escolha um status --</option>
+                    <option value="vida">❤️ Vida</option>
+                    <option value="sanidade">🧠 Sanidade</option>
+                    <option value="energia">⚡ Energia</option>
+                </select>
+                <div id="containerValorStatusEscritoPirata" class="hidden mt-3">
+                    <input id="valorStatusManualPirata" type="number" min="1" class="w-full p-3 rounded text-black font-semibold text-center bg-cyan-50" placeholder="Digite o valor do status">
+                </div>
+            </div>
+            <div class="flex justify-center gap-6 text-6xl font-bold mb-6">
+                <div id="dado1" class="bg-slate-800 p-4 rounded-lg border border-cyan-700 w-24 h-24 flex items-center justify-center">🎲</div>
+                <div id="dado2" class="bg-slate-800 p-4 rounded-lg border border-cyan-700 w-24 h-24 flex items-center justify-center">🎲</div>
+            </div>
+            <div id="totalDices" class="text-center text-2xl font-bold text-cyan-400 mb-6">Total: --</div>
+            <div id="resultadoRolagemStatusPirata" class="text-center text-sm text-cyan-200 mb-4"></div>
+            <div class="flex justify-center">
+                <button id="rolarDado" type="button" class="bg-red-600 hover:bg-red-500 px-8 py-4 rounded text-xl font-bold shadow-md transition-all">🎲 Rolar Dados</button>
+            </div>
+        </div>
+
+        <div id="containerResultado" class="hidden mt-8">
+            <div class="flex justify-center bg-stone-900 p-2 rounded-xl">
+                <div id="blocoImpressao" style="width: 100%; max-width: 800px; padding: 16mm; background: #faf6ee; box-sizing: border-box;">
+                    <div id="resultado" class="fundo-pergaminho-vintage p-6"></div>
+                </div>
+            </div>
+            
+            <button id="btnBaixarPNG" class="mt-4 w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg shadow uppercase tracking-wider transition-all">
+                📥 Gerar e Salvar Ficha em PNG
+            </button>
+        </div>
+
+    </main>
+
+    <script src="script-pirata.js"></script>
+</body>
+</html>

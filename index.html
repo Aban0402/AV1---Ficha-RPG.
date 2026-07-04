@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <title>RPG Forge</title>
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen">
+
+    <header class="bg-slate-800 p-6 shadow-lg flex justify-between items-center">
+        <div>
+            <h1 class="text-4xl font-bold text-amber-400">RPG Forge</h1>
+            <p class="text-gray-300 mt-2">Crie sua ficha de personagem</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <img src="assets/imagem.png" alt="Ilustração de ficha de RPG" class="hidden md:block h-20 w-auto rounded-lg shadow-md">
+            <div class="relative">
+            <button id="btnMenu" class="bg-slate-700 hover:bg-slate-600 rounded-full w-12 h-12 text-xl">👤</button>
+            <div id="menuDropdown" class="hidden absolute right-0 mt-2 w-64 bg-slate-700 rounded-lg shadow-xl overflow-hidden z-50">
+                <button id="menuAleatorio" class="w-full text-left px-4 py-3 hover:bg-slate-600">🎲 Gerar Ficha Aleatória</button>
+                <button id="menuManual" class="w-full text-left px-4 py-3 hover:bg-slate-600">⚔️ Gerar Ficha Manual</button>
+                
+                <button id="menuPirata" class="w-full text-left px-4 py-3 hover:bg-slate-600 text-cyan-400 font-semibold">
+                    🏴‍☠️ Forjar Ficha Pirata
+                </button>
+
+                <hr class="border-slate-500">
+                <button id="menuLogin" class="w-full text-left px-4 py-3 hover:bg-slate-600">👤 Login</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-6">
+        
+        <div id="telaFormulario" class="hidden bg-slate-800 rounded-xl p-6 shadow-lg">
+            <h2 class="text-2xl font-bold mb-6">Informações do Personagem</h2>
+            
+            <form id="formPersonagem" class="space-y-4">
+                <div>
+                    <label class="block mb-1">Nome</label>
+                    <input id="nome" type="text" class="w-full p-2 rounded text-black" placeholder="Digite o nome">
+                </div>
+
+                <div>
+                    <label class="block mb-1">Raça</label>
+                    <select id="raca" class="w-full p-2 rounded text-black">
+                        <option value="">Selecione</option>
+                        <option>Humano</option>
+                        <option>Elfo</option>
+                        <option>Anão</option>
+                        <option>Orc</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block mb-1">Classe</label>
+                    <select id="classe" class="w-full p-2 rounded text-black">
+                        <option value="">Selecione</option>
+                        <option>Guerreiro</option>
+                        <option>Mago</option>
+                        <option>Ladino</option>
+                        <option>Clérigo</option>
+                    </select>
+                </div>
+
+                <div class="border-t border-slate-700 pt-4">
+                    <label class="block mb-1 font-semibold text-amber-400">Sistema de Rolagem dos Atributos</label>
+                    <select id="tipoDado" class="w-full p-2 rounded text-black">
+                        <option value="d12">D12</option>
+                        <option value="2d6">2D6</option>
+                        <option value="d20" selected>D20</option>
+                    </select>
+                </div>
+
+                <div class="border-t border-slate-700 pt-4">
+                    <label class="block mb-1 font-semibold text-amber-400">Definição de Status (Vida/Mana/Energia)</label>
+                    <select id="tipoStatus" class="w-full p-2 rounded text-black">
+                        <option value="auto">Calcular Automaticamente baseado na Classe/Atributos</option>
+                        <option value="manual">Digitar Manualmente</option>
+                    </select>
+                </div>
+
+                <div id="containerStatusManuais" class="hidden grid grid-cols-3 gap-4 bg-slate-700 p-4 rounded-lg">
+                    <div>
+                        <label class="block text-sm mb-1">Vida Inicial</label>
+                        <input id="vidaManual" type="number" min="1" value="10" class="w-full p-2 rounded text-black">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Mana Inicial</label>
+                        <input id="manaManual" type="number" min="0" value="5" class="w-full p-2 rounded text-black">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">Energia Inicial</label>
+                        <input id="energiaManual" type="number" min="0" value="100" class="w-full p-2 rounded text-black">
+                    </div>
+                </div>
+
+                <button id="btnCriar" type="submit" class="bg-amber-500 px-4 py-2 rounded text-black font-bold hover:bg-amber-400 w-full mt-4">
+                    Criar Personagem
+                </button>
+            </form>
+        </div>
+
+        <div id="rolagem" class="hidden mt-8 bg-slate-800 rounded-xl p-6 shadow-lg">
+            <h2 id="tituloRolagem" class="text-3xl font-bold text-center text-amber-400 mb-2">Rolagem dos Atributos (D20)</h2>
+            <p id="subtituloRolagem" class="text-center text-gray-300 mb-6">Escolha um atributo por vez, role o dado e salve o valor dele.</p>
+
+            <div class="max-w-xs mx-auto mb-6">
+                <label class="block text-center mb-2 font-bold">Selecione o Atributo Alvo:</label>
+                <select id="selectAtributoManual" class="w-full p-3 rounded text-black font-semibold text-center bg-amber-100"></select>
+            </div>
+
+            <div id="resultadoDado" class="text-center text-8xl font-bold mb-6">🎲</div>
+
+            <div class="flex justify-center">
+                <button id="rolarDado" type="button" class="bg-red-600 hover:bg-red-500 px-8 py-4 rounded text-xl font-bold shadow-md transition-all">
+                    🎲 Rolar D20
+                </button>
+            </div>
+        </div>
+
+        <div id="containerResultado" class="hidden mt-8">
+            <div id="resultado" class="bg-slate-800 rounded-xl p-6 shadow-lg"></div>
+            <button id="btnBaixarPNG" class="mt-4 w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg shadow uppercase transition-all">
+                📥 Salvar Ficha Medieval em PNG
+            </button>
+        </div>
+
+    </main>
+
+    <script src="script.js?v=20260704"></script>
+</body>
+</html>
