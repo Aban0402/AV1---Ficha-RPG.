@@ -362,3 +362,112 @@ if (btnPNGMedieval) {
         });
     });
 }
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    if (typeof global !== 'undefined' && !global.document) {
+        try {
+            const { JSDOM } = require('jsdom');
+            const dom = new JSDOM('<!DOCTYPE html><html><body><div id="telaFormulario"></div><div id="rolagem"></div><div id="containerResultado"></div><div id="resultado"></div><div id="tituloRolagem"></div><div id="subtituloRolagem"></div><button id="rolarDado"></button><select id="selectAtributoManual"></select><form id="formPersonagem"><input id="nome" value="Herói Teste"/><input id="raca" value="Humano"/><input id="classe" value="Guerreiro"/><select id="tipoStatus"><option value="auto" selected></select><select id="tipoDado"><option value="d20" selected></select><input id="vidaManual"/><input id="manaManual"/><input id="energiaManual"/></form></body></html>');
+            global.window = dom.window;
+            global.document = dom.window.document;
+            global.navigator = dom.window.navigator;
+            global.Math = Math;
+        } catch (e) {
+            global.document = { getElementById: () => ({ addEventListener: () => {}, classList: { add: () => {}, remove: () => {} } }) };
+        }
+    }
+    module.exports = {
+        atributosChaves, obterNomeTipoDado, rolarDado, gerarAtributo,
+        calcularModificador, aplicarBonus, mostrarTelaRolagem, mostrarResultado,
+        atualizarTextoRolagem, renderizarFicha, atualizarSelectAtributos
+    };
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+        const containerResultado = document.getElementById('containerResultado');
+        if (containerResultado) {
+            const btnConcluir = document.createElement('button');
+            btnConcluir.id = 'btnConcluirFichaServer';
+            btnConcluir.className = 'mt-4 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all text-xl';
+            btnConcluir.textContent = '💾 Concluir e Salvar Ficha no Servidor';
+            
+            containerResultado.appendChild(btnConcluir);
+
+            btnConcluir.addEventListener('click', async () => {
+                const payload = {
+                    sistema: 'Medieval',
+                    nome: dadosTemporariosForm.nome || document.getElementById('nome')?.value || 'Herói Sem Nome',
+                    raca: dadosTemporariosForm.raca || document.getElementById('raca')?.value || 'Humano',
+                    classe: dadosTemporariosForm.classe || document.getElementById('classe')?.value || 'Guerreiro',
+                    atributos: atributosRolados
+                };
+
+                try {
+                    const resposta = await fetch('http://localhost:3000/api/fichas', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const dados = await resposta.json();
+
+                    if (resposta.ok) {
+                        alert(`🎉 Ficha Salva com Sucesso!\n\n${dados.mensagem}\nTotal de fichas no servidor: ${dados.quantiaCriada}`);
+                    } else {
+                        alert(`❌ Erro do Servidor: ${dados.erro}`);
+                    }
+                } catch (erro) {
+                    alert('❌ Erro de Conexão: Certifique-se de que o server.js está rodando na porta 3000.');
+                }
+            });
+        }
+    });
+}
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    if (typeof global !== 'undefined' && !global.document) {
+        try {
+            const { JSDOM } = require('jsdom');
+            const dom = new JSDOM('<!DOCTYPE html><html><body><div id="telaFormulario"></div><div id="rolagem"></div><div id="containerResultado"></div><div id="resultado"></div><div id="tituloRolagem"></div><div id="subtituloRolagem"></div><button id="rolarDado"></button><select id="selectAtributoManual"></select><form id="formPersonagem"><input id="nome" value="Herói Teste"/><input id="raca" value="Humano"/><input id="classe" value="Guerreiro"/><select id="tipoStatus"><option value="auto" selected></select><select id="tipoDado"><option value="d20" selected></select><input id="vidaManual"/><input id="manaManual"/><input id="energiaManual"/></form></body></html>');
+            global.window = dom.window;
+            global.document = dom.window.document;
+            global.navigator = dom.window.navigator;
+        } catch (e) {
+            global.document = { getElementById: () => ({ addEventListener: () => {}, classList: { add: () => {}, remove: () => {} }, appendChild: () => {} }) };
+        }
+    }
+    module.exports = {
+        atributosChaves, obterNomeTipoDado, rolarDado, gerarAtributo,
+        calcularModificador, aplicarBonus, mostrarTelaRolagem, mostrarResultado,
+        atualizarTextoRolagem, renderizarFicha, atualizarSelectAtributos
+    };
+}
+
+function enviarFichaAoServidor(sistema, nome, raca, classe, atributos) {
+    const usuarioId = localStorage.getItem('usuarioId'); 
+
+    const dadosFicha = {
+        sistema: sistema,
+        nome: nome,
+        raca: raca,
+        classe: classe,
+        atributos: atributos,
+        usuarioId: usuarioId ? parseInt(usuarioId) : null
+    };
+
+    fetch('http://localhost:3000/api/fichas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dadosFicha)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.erro) {
+            alert("Erro: " + data.erro);
+        } else {
+            alert(data.mensagem);
+        }
+    })
+    .catch(err => console.error("Erro ao enviar dados:", err));
+}
