@@ -4,47 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <title>RPG Forge - Login</title>
+    <title>RPG Forge - Acesso</title>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center">
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-slate-800 p-8 rounded-xl shadow-xl max-w-sm w-full text-center border border-slate-700">
-        <h2 class="text-3xl font-bold text-amber-400 mb-2">Entrar no Forge</h2>
-        <p class="text-gray-400 mb-6 text-sm">Guarde suas fichas de RPG na nuvem com sua conta.</p>
-
-        <div id="g_id_onload"
-             data-client_id="SEU_CLIENT_ID_AQUI.apps.googleusercontent.com"
-             data-context="signin"
-             data-ux_mode="popup"
-             data-callback="handleCredentialResponse"
-             data-auto_prompt="false">
+    <div class="bg-slate-800 p-8 rounded-xl shadow-xl max-w-sm w-full border border-slate-700">
+        <h2 class="text-3xl font-bold text-amber-400 mb-6 text-center">RPG Forge</h2>
+        
+        <div id="areaLogin">
+            <h3 class="text-xl font-bold mb-4 text-center">Entrar</h3>
+            <form id="formLogin" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">E-mail</label>
+                    <input type="email" id="loginEmail" required class="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Senha</label>
+                    <input type="password" id="loginSenha" required class="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-amber-400">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-2 rounded transition-colors">Entrar</button>
+            </form>
+            <p class="text-sm text-gray-400 mt-4 text-center">
+                Não tem conta? <button onclick="alternarAbas()" class="text-amber-400 hover:underline">Cadastre-se</button>
+            </p>
         </div>
 
-        <div class="flex justify-center my-4">
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-shape="pill"
-                 data-theme="filled_blue"
-                 data-text="signin_with"
-                 data-size="large"
-                 data-logo_alignment="left">
-            </div>
+        <div id="areaCadastro" class="hidden">
+            <h3 class="text-xl font-bold mb-4 text-center">Criar Conta</h3>
+            <form id="formCadastro" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Nome</label>
+                    <input type="text" id="cadNome" required class="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">E-mail</label>
+                    <input type="email" id="cadEmail" required class="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Senha</label>
+                    <input type="password" id="cadSenha" required class="w-full p-2 rounded bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-amber-400">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded transition-colors">Cadastrar</button>
+            </form>
+            <p class="text-sm text-gray-400 mt-4 text-center">
+                Já tem conta? <button onclick="alternarAbas()" class="text-amber-400 hover:underline">Faça Login</button>
+            </p>
         </div>
 
         <hr class="border-slate-700 my-6">
-
-        <a href="index.html" class="text-amber-400 hover:underline text-sm flex items-center justify-center gap-1">
-            ⬅ Voltar para o Forjador
-        </a>
+        <div class="text-center">
+            <a href="index.html" class="text-gray-400 hover:text-white text-sm">⬅ Voltar para o Criador de Fichas</a>
+        </div>
     </div>
 
     <script>
-        function handleCredentialResponse(response) {
-            console.log("Token JWT recebido do Google:", response.credential);
-            alert("Login efetuado com sucesso (Simulado via Console)!");
-            window.location.href = "index.html"; 
+        function alternarAbas() {
+            document.getElementById('areaLogin').classList.toggle('hidden');
+            document.getElementById('areaCadastro').classList.toggle('hidden');
         }
+
+        document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('cadNome').value;
+            const email = document.getElementById('cadEmail').value;
+            const senha = document.getElementById('cadSenha').value;
+
+            try {
+                const resposta = await fetch('http://localhost:3000/api/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha })
+                });
+                const dados = await resposta.json();
+
+                if (resposta.ok) {
+                    alert('Cadastro realizado com sucesso! Faça login para continuar.');
+                    alternarAbas();
+                } else {
+                    alert('Erro: ' + dados.erro);
+                }
+            } catch (err) {
+                alert('Não foi possível conectar ao servidor.');
+            }
+        });
+
+        document.getElementById('formLogin').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const senha = document.getElementById('loginSenha').value;
+
+            try {
+                const resposta = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+                const dados = await resposta.json();
+
+                if (resposta.ok) {
+                    localStorage.setItem('usuarioId', dados.usuario.id);
+                    localStorage.setItem('usuarioNome', dados.usuario.nome);
+                    
+                    alert(`Bem-vindo de volta, ${dados.usuario.nome}!`);
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Erro: ' + dados.erro);
+                }
+            } catch (err) {
+                alert('Não foi possível conectar ao servidor.');
+            }
+        });
     </script>
 </body>
 </html>
